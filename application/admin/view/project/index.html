@@ -1,0 +1,129 @@
+{extend name="layout/app" /}
+{block name="ext_css"}
+<link rel="stylesheet" href="/static/admin/css/layer.css">
+{/block}
+{block name="content"}
+<div class="col-md-12">
+    <section class="panel">
+        <header class="panel-heading">
+            <h4>创业补贴项目列表</h4>
+
+        </header>
+        <table class="table table-hover">
+            <thead>
+            <tr class="text-center">
+                <th>编号</th>
+                <th>申报类型</th>
+                <th>项目名称</th>
+                <th>团队人数</th>
+                <th>所在学院</th>
+                <th>申报人学号</th>
+                <th>申报人姓名</th>
+                <th>申报人电话</th>
+                <th>申报时间</th>
+                <th>初审</th>
+                <th>复审</th>
+                <th>查看</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr v-for="project in list">
+                <td>{{ project.cybt_id }}</td>
+                <td>{{ project.type }}</td>
+                <td>{{ project.name }}</td>
+                <td>{{ project.members }}</td>
+                <td>{{ project.academy }}</td>
+                <td>{{ project.std_id }}</td>
+                <td>{{ project.real_name }}</td>
+                <td>{{ project.phone }}</td>
+                <td>{{ project.submit_time }}</td>
+                <td>
+                    {{ project.first_review }}
+                </td>
+                <td>
+                    {{ project.last_review }}
+                </td>
+                <td>
+                    <form action="{:url('admin/service/view')}" method="post">
+                        <input type="hidden" name="id[0]" v-bind:value="project.file_id_0">
+                        <input type="hidden" name="id[1]" v-bind:value="project.file_id_1">
+                        <input type="hidden" name="id[2]" v-bind:value="project.file_id_2">
+                        <input type="hidden" name="id[3]" v-bind:value="project.file_id_3">
+                        <input type="hidden" name="id[4]" v-bind:value="project.file_id_4">
+                        <input type="hidden" name="id[5]" v-bind:value="project.file_id_5">
+                        <input type="hidden" name="projects_name" v-bind:value="project.projects_name">
+                        <input type="hidden" name="projects_id" v-bind:value="project.cybt_id">
+                        <button type="submit" class="btn btn-success btn-xs"><i class="fa fa-eye"></i> 点击查看</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-md-3 col-xs-6">
+                <p class="text-primary" style="margin:20px 0;line-height: 34px">
+                    已展示{{ presentNum }}条 / 总共{{ totalNum }}条
+                </p>
+            </div>
+            <div class="col-md-4 col-xs-12 text-center pull-right">
+                <nav>
+                    <ul class="pagination">
+                        <li v-bind:class="{'disabled':(presentPage-1)==0}">
+                            <a v-bind:href="'?page='+(presentPage-1)" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li v-for="n in totalPage" v-bind:class="{'active':presentPage==n}"><a v-bind:href="'?page='+(n)">{{ n }}</a></li>
+                        <li v-bind:class="{'disabled':(presentPage+1)>totalPage}">
+                            <a v-bind:href="'?page='+(presentPage+1)" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </section>
+</div>
+{/block}
+{block name="ext_js"}
+<script>
+
+
+
+    new Vue({
+        el:".panel",
+
+        data: function () {
+            return {
+                list: [],
+                presentNum: "",
+                presentPage: "{:empty($_GET['page'])?1:$_GET['page']}",
+                totalNum: "",
+                totalPage: ""
+            }
+        },
+        props: {
+            list: Object,
+        },
+        created: function () {
+            var vm = this;
+            layer.msg("正在努力加载中...");
+            $.getJSON("{:url('admin/service/cybtGetAllList')}", {page: vm.presentPage}, function (res) {
+                if (res.code == 1) {
+                    vm.list=res.data.cybtList;
+                    vm.presentNum=res.data.presentNum;
+                    vm.presentPage=res.data.presentPage;
+                    vm.totalNum=res.data.totalNum;
+                    vm.totalPage=res.data.totalPage;
+
+                } else {
+                    layer.alert(res.msg);
+                }
+            });
+        }
+    })
+</script>
+{/block}
+

@@ -1,0 +1,65 @@
+{extend name="layout/app" /}
+{block name="ext_css"}
+
+{/block}
+
+{block name="content"}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <section class="panel">
+                <header class="panel-heading">
+                    项目申报开放时间
+                </header>
+                <div class="panel-body">
+                    <form class="form" role="form">
+                        <div class="form-group">
+                            <label class="sr-only" for="open_day">开放日期</label>
+                            <input type="text" v-model="open_day" v-bind:value="open_day" class="form-control" id="open_day" placeholder="请输入开放申报的截止时间">
+                            <p class="help-block text-danger">请输入每月开放日期，如:15，代表每月1-15日开放，16日到本月结束则关闭提交入口。</p>
+                        </div>
+                        <button type="button" @click.stop.prevent="update_config" class="btn btn-success">保存</button>
+                    </form>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+{/block}
+
+{block name="ext_js"}
+<script>
+    new Vue({
+        el:"form",
+        data:{
+            open_day:"{$date[0]}"
+        },
+        methods:{
+            update_config:function(){
+                var data={date:this.open_day};
+                $.ajax({
+                    type:"POST",
+                    dataType:"json",
+                    data:data,
+                    url:"{:url('admin/service/cybtConfigUpdate')}",
+                    beforeSend:function(){
+                        layer.msg('正在提交中...');
+                    },
+                    success:function(res){
+                        if(res.code==1){
+                            layer.msg(res.msg);
+                        }else{
+                            layer.alert(res.msg);
+                        }
+                    },
+                    error:function(){
+                        layer.alert("抱歉,系统出错了!");
+                    }
+                })
+            }
+        }
+    })
+</script>
+{/block}
